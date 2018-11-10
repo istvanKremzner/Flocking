@@ -17,11 +17,14 @@ public class FollowTheBoid : MonoBehaviour
 
     private void Update()
     {
-        Vector3 avaragePosition = GetAvaragePos();
+        if (bounds.activeSelf)
+        {
+            Vector3 avaragePosition = GetAvaragePos();
 
-        this.transform.position = avaragePosition - offset;
+            this.transform.position = avaragePosition - offset;
 
-        this.transform.LookAt(avaragePosition);
+            this.transform.LookAt(avaragePosition);
+        }
     }
 
     private Vector3 GetAvaragePos()

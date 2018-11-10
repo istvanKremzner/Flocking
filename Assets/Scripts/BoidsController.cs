@@ -59,17 +59,14 @@ public class BoidsController : MonoBehaviour
         }
     }
 
-    private void Awake()
+    public void Init()
     {
         bounds = this.GetComponent<BoxCollider>();
 
         avoids = new List<GameObject>();
         boids = new List<GameObject>();
 
-        ////testing
-        //MakeCubes();
-
-        GetAvoids();
+        GetObstacles();
 
         float minPerc = 0.1f;
         for (int i = 0; i < InitNumber; i++)
@@ -87,24 +84,10 @@ public class BoidsController : MonoBehaviour
         }
     }
 
-    private void GetAvoids()
+    private void GetObstacles()
     {
         foreach (Transform actTransform in this.transform)
             if (!actTransform.GetComponent<Boid>())
                 avoids.Add(actTransform.gameObject);
-    }
-
-    //Just for testing
-    private void MakeCubes()
-    {
-        for (int z = 0; z < bounds.size.z; z++)
-        {
-            for (int y = 0; y < bounds.size.y; y++)
-            {
-                GameObject current = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Cube), this.transform);
-
-                current.transform.localPosition = new Vector3(0, y - bounds.size.y / 2, z - bounds.size.z / 2);
-            }
-        }
     }
 }
