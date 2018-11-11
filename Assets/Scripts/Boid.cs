@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// The script that a fish/bird has that controlls its movement.
+/// </summary>
 public class Boid : MonoBehaviour
 {
     private BoidsController controller;
@@ -43,6 +46,9 @@ public class Boid : MonoBehaviour
 
     private float NoiseMaximum { get { return controller.maxNoise; } }
 
+    /// <summary>
+    /// Init.
+    /// </summary>
     private void Start()
     {
         rigid = this.GetComponent<Rigidbody>();
@@ -60,6 +66,9 @@ public class Boid : MonoBehaviour
         thinkTimer = Random.Range(0, 10);
     }
 
+    /// <summary>
+    /// FIxed updated because I used Rigidbody. Physics based components should be updated in FixedUpdate.
+    /// </summary>
     private void FixedUpdate()
     {
         Increment();
@@ -78,17 +87,27 @@ public class Boid : MonoBehaviour
         TurnToVelocityDirection();
     }
 
+    /// <summary>
+    /// Draws a sphere with friendRadius radius around the fish/bird if the option is enabled in the BoidController.
+    /// Only for debugging.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (controller.showFriendRadius)
             Gizmos.DrawWireSphere(this.transform.position, FriendRadius);
     }
 
+    /// <summary>
+    /// Increments the think timer.
+    /// </summary>
     private void Increment()
     {
         thinkTimer = (thinkTimer + 1) % 5;
     }
 
+    /// <summary>
+    /// Checks for other Boids within friend radius and adds them to friends list.
+    /// </summary>
     private void GetFriends()
     {
         List<GameObject> nearby = new List<GameObject>();
@@ -103,6 +122,10 @@ public class Boid : MonoBehaviour
         }
         friends = nearby;
     }
+
+    /// <summary>
+    /// Moves the Boid in the appropriate direction.
+    /// </summary>
     private void Flock()
     {
         Vector3 allign = GetAvarageDirection();
@@ -148,6 +171,10 @@ public class Boid : MonoBehaviour
         Move = Vector3.ClampMagnitude(Move * MaxSpeed, MaxSpeed);
     }
 
+    /// <summary>
+    /// Averages the other Boid's heading direction in the friends list.
+    /// </summary>
+    /// <returns>The avarage heading direction of the group.</returns>
     private Vector3 GetAvarageDirection()
     {
         Vector3 sum = Vector3.zero;
@@ -171,6 +198,10 @@ public class Boid : MonoBehaviour
         return sum;
     }
 
+    /// <summary>
+    /// Checks whether this Boid is too close to other Boids.
+    /// </summary>
+    /// <returns>The direction this Boid should too not get too close to others.</returns>
     private Vector3 GetCrowdAvoidDirection()
     {
         Vector3 steer = Vector3.zero;
@@ -193,6 +224,10 @@ public class Boid : MonoBehaviour
         return steer;
     }
 
+    /// <summary>
+    /// Checks whether there are obstacles in its way.
+    /// </summary>
+    /// <returns>The direction this Boid should avoid getting too close to the obstacles.</returns>
     public Vector3 GetObstacleAvoidDirection()
     {
         Vector3 steer = Vector3.zero;
@@ -216,6 +251,10 @@ public class Boid : MonoBehaviour
         return steer;
     }
 
+    /// <summary>
+    /// Averages the other Boid's direction in the friends list.
+    /// </summary>
+    /// <returns>The avarage direction of the group.</returns>
     private Vector3 GetCohesion()
     {
         Vector3 sum = Vector3.zero;
@@ -241,6 +280,9 @@ public class Boid : MonoBehaviour
             return Vector3.zero;
     }
 
+    /// <summary>
+    /// If the Boid hits the bounding walls the appropriate heading direction components gets inverted.
+    /// </summary>
     private void KeepBoundaries()
     {
         Vector3 signed = Move;
@@ -263,6 +305,9 @@ public class Boid : MonoBehaviour
         Move = signed;
     }
 
+    /// <summary>
+    /// Turns the Boid to the heading direction.
+    /// </summary>
     private void TurnToVelocityDirection()
     {
         this.transform.rotation = Quaternion.LookRotation(Move);

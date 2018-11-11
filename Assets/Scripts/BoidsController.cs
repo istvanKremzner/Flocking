@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Controlls and instantiates the boids.
+/// </summary>
 public class BoidsController : MonoBehaviour
 {
     private BoxCollider bounds;
@@ -59,6 +62,9 @@ public class BoidsController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Inits the variables, gets the Obstacles and instantiates the Boids.
+    /// </summary>
     public void Init()
     {
         bounds = this.GetComponent<BoxCollider>();
@@ -84,6 +90,10 @@ public class BoidsController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gets the obstacles.
+    /// The children of this GameObject but aren't Boids.
+    /// </summary>
     private void GetObstacles()
     {
         foreach (Transform actTransform in this.transform)

@@ -4136,6 +4136,7 @@ GameObject:
   - component: {fileID: 967356165}
   - component: {fileID: 967356164}
   - component: {fileID: 967356167}
+  - component: {fileID: 967356168}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4216,6 +4217,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bounds: {fileID: 1628143742}
   offset: {x: 40, y: -400, z: 20}
+--- !u!114 &967356168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 967356163}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f708dc5bda0d824f8b98ec886a3d779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &969438877
 GameObject:
   m_ObjectHideFlags: 0
@@ -5395,6 +5407,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3442d79448f332149bbb011f40e1beae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  followRayMaxLength: 0
   Menu: {fileID: 761125962}
 --- !u!1 &1382496840
 GameObject:
@@ -6551,7 +6564,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 1958968877722956, guid: 72352e9d212ef3543b1aee9fb5f4795c, type: 2}
-  InitNumber: 100
+  InitNumber: 40
   maxSpeed: 5
   friendRadius: 20
   crowdRadius: 3

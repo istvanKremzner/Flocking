@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FriendyFishCounter : MonoBehaviour
+/// <summary>
+/// Counts Frames Per Second and writes it to the screen.
+/// </summary>
+public class FPSCounter : MonoBehaviour
 {
 
     float deltaTime = 0.0f;

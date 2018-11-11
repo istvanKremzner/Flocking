@@ -3,18 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Sets the camera to the avarage position of the Boids with offset.
+/// </summary>
 public class FollowTheBoid : MonoBehaviour
 {
-
     public GameObject bounds;
     public Vector3 offset;
 
-    private List<GameObject> boids {
-        get {
+    private List<GameObject> boids
+    {
+        get
+        {
             return bounds.GetComponent<BoidsController>().Boids;
         }
     }
 
+    /// <summary>
+    /// If the BoidController's GameObject is active, sets the camera's position to the avarage position of the Boids with the applied offsets.
+    /// </summary>
     private void Update()
     {
         if (bounds.activeSelf)
@@ -27,6 +34,10 @@ public class FollowTheBoid : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gets the avarage position of the Boids.
+    /// </summary>
+    /// <returns>The avarage position.</returns>
     private Vector3 GetAvaragePos()
     {
         Vector3 sum = Vector3.zero;

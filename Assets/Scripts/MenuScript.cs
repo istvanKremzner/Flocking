@@ -41,76 +41,117 @@ public class MenuScript : MonoBehaviour
 
     private bool loaded = false;
 
+    /// <summary>
+    /// Copies the friend options from the Toggle to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetOptionFriend()
     {
         if (loaded)
             controller.optionFriend = OptionFriend.isOn;
     }
 
+    /// <summary>
+    /// Copies the crowd options from the Toggle to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetOptionCrowd()
     {
         if (loaded)
             controller.optionCrowd = OptionCrowd.isOn;
     }
 
+    /// <summary>
+    /// Copies the avoid options from the Toggle to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetOptionAvoid()
     {
         if (loaded)
             controller.optionAvoid = OptionAvoid.isOn;
     }
 
+    /// <summary>
+    /// Copies the noise options from the Toggle to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetOptionNoise()
     {
         if (loaded)
             controller.optionNoise = OptionNoise.isOn;
     }
 
+    /// <summary>
+    /// Copies the cohese options from the Toggle to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetOptionCohese()
     {
         if (loaded)
             controller.optionCohese = OptionCohese.isOn;
     }
 
+    /// <summary>
+    /// Copies the max speed from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetMaxSpeed()
     {
         if (loaded)
             controller.maxSpeed = MaxSpeed.value;
     }
 
+    /// <summary>
+    /// Copies the friend radius from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetFriendRadius()
     {
         if (loaded)
             controller.friendRadius = FriendRadius.value;
     }
 
+    /// <summary>
+    /// Copies the crowd radius from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetCrowdRadius()
     {
         if (loaded)
             controller.crowdRadius = CrowdRadius.value;
     }
+
+    /// <summary>
+    /// Copies the avoid radius from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetObstacleAvoidRadius()
     {
         if (loaded)
             controller.avoidRadius = ObstacleAvoidRadius.value;
     }
+
+    /// <summary>
+    /// Copies the noise lelevel from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetNoiseLevel()
     {
         if (loaded)
             controller.maxNoise = NoiseLevel.value;
     }
 
+    /// <summary>
+    /// Copies the cohese radius from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetCoheseRadius()
     {
         if (loaded)
             controller.coheseRadius = CoheseRadius.value;
     }
 
+    /// <summary>
+    /// Copies the init number from the Slider to the BoidController, but only if the Toggle is loaded.
+    /// </summary>
     public void SetInitNumber()
     {
         if (loaded)
             controller.InitNumber = int.Parse(InitNumber.text);
     }
 
+    /// <summary>
+    /// When the camera mode is changed in the menu Dropdown, applies the appropriate changes.
+    /// </summary>
     public void ChangeCameraMode()
     {
         FollowTheBoid followScript = mainCamera.GetComponent<FollowTheBoid>();
@@ -128,6 +169,9 @@ public class MenuScript : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// When the animal is changed in the menu Dropdown, changes the prefab in the BoidController.
+    /// </summary>
     public void ChangeAnimal()
     {
         FollowTheBoid followScript = mainCamera.GetComponent<FollowTheBoid>();
@@ -143,6 +187,10 @@ public class MenuScript : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Switches between frozen time and normal time.
+    /// </summary>
+    /// <param name="on"></param>
     public void SwitchTime(bool on)
     {
         if (on)
@@ -151,16 +199,25 @@ public class MenuScript : MonoBehaviour
             Time.timeScale = 0.0f;
     }
 
+    /// <summary>
+    /// Reloads the current scene.
+    /// </summary>
     public void Restart()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    /// <summary>
+    /// Quits the application.
+    /// </summary>
     public void ShutDown()
     {
         Application.Quit();
     }
 
+    /// <summary>
+    /// Copies the values for the Menu items from the BoidController for initalize.
+    /// </summary>
     private void GetValues()
     {
         loaded = true;
@@ -181,6 +238,9 @@ public class MenuScript : MonoBehaviour
         CoheseRadius.value = controller.coheseRadius;
     }
 
+    /// <summary>
+    /// Executes shortly after the scene is loaded.
+    /// </summary>
     private void Awake()
     {
         GetValues();
