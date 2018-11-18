@@ -67,7 +67,7 @@ public class Boid : MonoBehaviour
     }
 
     /// <summary>
-    /// FIxed updated because I used Rigidbody. Physics based components should be updated in FixedUpdate.
+    /// Fixed updated because I used Rigidbody. Physics based components should be updated in FixedUpdate.
     /// </summary>
     private void FixedUpdate()
     {
