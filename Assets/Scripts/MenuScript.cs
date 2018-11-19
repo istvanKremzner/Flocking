@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class MenuScript : MonoBehaviour
 {
+    private const float CAMERADISTANCE = 50;
+
     [Header("Prefabs")]
     public GameObject fishPrefab;
     public GameObject birdPrefab;
@@ -159,9 +161,8 @@ public class MenuScript : MonoBehaviour
         {
             followScript.enabled = false;
 
-            mainCamera.transform.position = new Vector3(bounds.transform.position.x, bounds.transform.position.y, -420);
+            mainCamera.transform.position = new Vector3(bounds.transform.position.x, bounds.transform.position.y, -bounds.size.z - CAMERADISTANCE);
             mainCamera.transform.eulerAngles = new Vector3(0, 0, 0);
-            //mainCamera.transform.LookAt(bounds.transform.position);
         }
         else if (CameraMode.value == 1)
         {

@@ -56,6 +56,9 @@ public class KeyHandler : MonoBehaviour
 
             float scroll = Input.GetAxis("Mouse ScrollWheel");
 
+            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadPlus) ? 0.05f : scroll;
+            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadMinus) ? -0.05f : scroll;
+
             if (scroll != 0)
             {
                 moveCamera += new Vector3(0, 0, scroll * SCROLLSTEP);

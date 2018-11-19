@@ -22,7 +22,7 @@ public class Boid : MonoBehaviour
 
     public int FriendsCount { get { return friends.Count; } }
 
-    private Vector3 Move { get { return rigid.velocity; } set { rigid.velocity = value; } }
+    private Vector3 Move { get; set; }
 
     public BoxCollider Bounds { get { return controller.Bounds; } }
     private List<GameObject> Boids { get { return controller.Boids; } }
@@ -30,7 +30,7 @@ public class Boid : MonoBehaviour
     private float CrowdRadius { get { return controller.crowdRadius; } }
     private float AvoidRadius { get { return controller.avoidRadius; } }
     private float CoheseRadius { get { return controller.coheseRadius; } }
-    private float MaxSpeed { get { return controller.maxSpeed; } }
+    private float MaxSpeed { get { return controller.GetMaxSpeed; } }
 
     private List<GameObject> Avoids { get { return controller.Avoids; } }
 
@@ -60,7 +60,6 @@ public class Boid : MonoBehaviour
             Random.Range(-MaxSpeed, MaxSpeed),
             Random.Range(-MaxSpeed, MaxSpeed));
 
-        //Move.Normalize();
         Move = Vector3.ClampMagnitude(Move, MaxSpeed);
 
         thinkTimer = Random.Range(0, 10);
@@ -80,11 +79,13 @@ public class Boid : MonoBehaviour
 
         Flock();
 
-        Move = Vector3.ClampMagnitude(Move, MaxSpeed);
-
         KeepBoundaries();
 
         TurnToVelocityDirection();
+
+        this.transform.localPosition += Move;
+
+        //Debug.Log(Move);
     }
 
     /// <summary>
@@ -132,9 +133,9 @@ public class Boid : MonoBehaviour
         Vector3 avoidDir = GetCrowdAvoidDirection();
         Vector3 avoidObjects = GetObstacleAvoidDirection();
         Vector3 noise = new Vector3(
-            (Random.value * NoiseMaximum) - NoiseMaximum / 2,
-            (Random.value * NoiseMaximum) - NoiseMaximum / 2,
-            (Random.value * NoiseMaximum) - NoiseMaximum / 2
+            (Random.value * NoiseMaximum * 2) - NoiseMaximum,
+            (Random.value * NoiseMaximum * 2) - NoiseMaximum,
+            (Random.value * NoiseMaximum * 2) - NoiseMaximum
             );
         Vector3 cohese = GetCohesion();
 
@@ -153,7 +154,7 @@ public class Boid : MonoBehaviour
         if (!OptionAvoid)
             avoidObjects *= 0;
 
-        noise *= 1f;
+        noise *= 0.1f;
         if (!OptionNoise)
             noise *= 0;
 
@@ -168,7 +169,7 @@ public class Boid : MonoBehaviour
         Move += cohese;
 
         Move.Normalize();
-        Move = Vector3.ClampMagnitude(Move * MaxSpeed, MaxSpeed);
+        Move = Vector3.ClampMagnitude(Move, MaxSpeed);
     }
 
     /// <summary>
@@ -271,7 +272,7 @@ public class Boid : MonoBehaviour
         }
         if (count > 0)
         {
-            sum.Normalize();
+            sum /= count;
             Vector3 desired = sum - this.transform.position;
 
             return Vector3.ClampMagnitude(desired, 0.05f);
@@ -298,7 +299,7 @@ public class Boid : MonoBehaviour
             signed.y = -Mathf.Abs(Move.y);
 
         if ((this.transform.localPosition.z <= (-Bounds.size.z / 2) && Move.z < 0))
-            signed.z = Mathf.Abs(Move.z);
+            signed.z = Mathf.Abs(Move.z);   
         else if (this.transform.localPosition.z >= (Bounds.size.z / 2) && Move.z > 0)
             signed.z = -Mathf.Abs(Move.z);
 

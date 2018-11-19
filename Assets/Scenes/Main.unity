@@ -1104,6 +1104,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
+      - m_Target: {fileID: 213000906}
+        m_MethodName: ChangeCameraMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &305249086
@@ -6165,10 +6176,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 1056606561}
   m_HandleRect: {fileID: 1660307592}
   m_Direction: 0
-  m_MinValue: 5
-  m_MaxValue: 100
+  m_MinValue: 0.01
+  m_MaxValue: 10
   m_WholeNumbers: 0
-  m_Value: 5
+  m_Value: 0.01
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -6564,18 +6575,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 1958968877722956, guid: 72352e9d212ef3543b1aee9fb5f4795c, type: 2}
-  InitNumber: 40
-  maxSpeed: 5
-  friendRadius: 20
+  InitNumber: 10
+  maxSpeed: 0.3
+  friendRadius: 10
   crowdRadius: 3
   avoidRadius: 4
   coheseRadius: 2
-  maxNoise: 0.4
-  optionFriend: 1
-  optionCrowd: 1
-  optionAvoid: 1
-  optionNoise: 1
-  optionCohese: 1
+  maxNoise: 0.1
+  optionFriend: 0
+  optionCrowd: 0
+  optionAvoid: 0
+  optionNoise: 0
+  optionCohese: 0
   showFriendRadius: 0
 --- !u!1 &1657919521
 GameObject:

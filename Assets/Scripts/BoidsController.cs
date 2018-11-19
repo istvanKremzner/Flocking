@@ -1,12 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Controlls and instantiates the boids.
 /// </summary>
 public class BoidsController : MonoBehaviour
 {
+    private static Vector3 TankRates = new Vector3(2, 1, 1);
+    private const float SPACEPERFISH = 5;
+
     private BoxCollider bounds;
     public GameObject prefab;
 
@@ -38,6 +44,14 @@ public class BoidsController : MonoBehaviour
     [Header("Debug options")]
     public bool showFriendRadius;
 
+    public float GetMaxSpeed
+    {
+        get
+        {
+            return maxSpeed * prefab.transform.localScale.x;
+        }
+    }
+
     public BoxCollider Bounds
     {
         get
@@ -68,6 +82,7 @@ public class BoidsController : MonoBehaviour
     public void Init()
     {
         bounds = this.GetComponent<BoxCollider>();
+        SetBoundsSize();
 
         avoids = new List<GameObject>();
         boids = new List<GameObject>();
@@ -100,4 +115,18 @@ public class BoidsController : MonoBehaviour
             if (!actTransform.GetComponent<Boid>())
                 avoids.Add(actTransform.gameObject);
     }
+
+    /// <summary>
+    /// Sets the aquarium size according to the number of fishes.
+    /// </summary>
+    private void SetBoundsSize()
+    {
+        float volume = SPACEPERFISH * InitNumber;
+        Vector3 volume3D = TankRates * volume;
+
+        Bounds.size = volume3D;
+
+        prefab.transform.localScale = volume / 50 * Vector3.one;
+    }
+
 }
