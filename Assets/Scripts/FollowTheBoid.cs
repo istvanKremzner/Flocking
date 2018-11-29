@@ -11,7 +11,7 @@ public class FollowTheBoid : MonoBehaviour
     public GameObject bounds;
     public Vector3 offset;
 
-    private List<GameObject> boids
+    private List<Boid> boids
     {
         get
         {
@@ -42,8 +42,8 @@ public class FollowTheBoid : MonoBehaviour
     {
         Vector3 sum = Vector3.zero;
 
-        foreach (GameObject actBoid in boids)
-            sum += actBoid.transform.position;
+        foreach (Boid actBoid in boids)
+            sum += actBoid.Position;
 
         if (boids.Count > 0)
             return sum / boids.Count;

@@ -2,37 +2,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 /// <summary>
 /// The script that a fish/bird has that controlls its movement.
 /// </summary>
 public class Boid : MonoBehaviour
 {
+    private Random rnd = new Random();
+
     private BoidsController controller;
 
-    private Rigidbody rigid;
-
     //private Vector3 move;
-    private List<GameObject> friends;
+    private List<Boid> friends;
 
     private int thinkTimer = 0;
 
-    public BoidsController SetController { set { this.controller = value; } }
-
     public int FriendsCount { get { return friends.Count; } }
 
+    private Vector3 localPos;
+    public Vector3 Position { get; set; }
     private Vector3 Move { get; set; }
+    public Quaternion Rotation { get; set; }
 
-    public BoxCollider Bounds { get { return controller.Bounds; } }
-    private List<GameObject> Boids { get { return controller.Boids; } }
-    private float FriendRadius { get { return controller.friendRadius; } }
-    private float CrowdRadius { get { return controller.crowdRadius; } }
-    private float AvoidRadius { get { return controller.avoidRadius; } }
-    private float CoheseRadius { get { return controller.coheseRadius; } }
+    private Vector3 boundsSize { get; set; }
+
+    private List<Boid> Boids { get; set; }
+    private float FriendRadius { get { return controller.GetFriendRadius; } }
+    private float CrowdRadius { get { return controller.GetCrowdRadius; } }
+    private float AvoidRadius { get { return controller.GetAvoidRadius; } }
+    private float CoheseRadius { get { return controller.GetCoheseRadius; } }
     private float MaxSpeed { get { return controller.GetMaxSpeed; } }
 
-    private List<GameObject> Avoids { get { return controller.Avoids; } }
+    private List<Bounds> Avoids { get; set; }
 
     private bool OptionFriend { get { return controller.optionFriend; } }
 
@@ -46,29 +48,36 @@ public class Boid : MonoBehaviour
 
     private float NoiseMaximum { get { return controller.maxNoise; } }
 
+    public void SetController(BoidsController value, Vector3 pos)
+    {
+        this.controller = value;
+        boundsSize = controller.Bounds.size;
+        Boids = controller.Boids;
+        Avoids = controller.Avoids;
+        localPos = pos;
+    }
+
     /// <summary>
     /// Init.
     /// </summary>
     private void Start()
     {
-        rigid = this.GetComponent<Rigidbody>();
-
-        friends = new List<GameObject>();
+        friends = new List<Boid>();
 
         Move = new Vector3(
-            Random.Range(-MaxSpeed, MaxSpeed),
-            Random.Range(-MaxSpeed, MaxSpeed),
-            Random.Range(-MaxSpeed, MaxSpeed));
+            (float)(rnd.NextDouble() * MaxSpeed * 2 - MaxSpeed),
+            (float)(rnd.NextDouble() * MaxSpeed * 2 - MaxSpeed),
+            (float)(rnd.NextDouble() * MaxSpeed * 2 - MaxSpeed));
 
         Move = Vector3.ClampMagnitude(Move, MaxSpeed);
 
-        thinkTimer = Random.Range(0, 10);
+        thinkTimer = rnd.Next(0, 10);
     }
 
     /// <summary>
     /// Fixed updated because I used Rigidbody. Physics based components should be updated in FixedUpdate.
     /// </summary>
-    private void FixedUpdate()
+    public void MyUpdate()
     {
         Increment();
 
@@ -83,9 +92,9 @@ public class Boid : MonoBehaviour
 
         TurnToVelocityDirection();
 
-        this.transform.localPosition += Move;
 
-        //Debug.Log(Move);
+        this.localPos += Move;
+        this.Position = localPos;
     }
 
     /// <summary>
@@ -95,7 +104,7 @@ public class Boid : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (controller.showFriendRadius)
-            Gizmos.DrawWireSphere(this.transform.position, FriendRadius);
+            Gizmos.DrawWireSphere(this.Position, FriendRadius);
     }
 
     /// <summary>
@@ -111,13 +120,13 @@ public class Boid : MonoBehaviour
     /// </summary>
     private void GetFriends()
     {
-        List<GameObject> nearby = new List<GameObject>();
-        foreach (GameObject actBoid in Boids)
+        List<Boid> nearby = new List<Boid>();
+        foreach (var actBoid in Boids)
         {
-            GameObject test = actBoid;
-            if (test != this.gameObject)
+            Boid test = actBoid;
+            if (test != this)
             {
-                if (Vector3.Distance(this.transform.position, test.transform.position) <= FriendRadius)
+                if (Vector3.Distance(this.localPos, test.Position) <= FriendRadius)
                     nearby.Add(test);
             }
         }
@@ -129,13 +138,15 @@ public class Boid : MonoBehaviour
     /// </summary>
     private void Flock()
     {
+        Random rnd = new Random();
+
         Vector3 allign = GetAvarageDirection();
         Vector3 avoidDir = GetCrowdAvoidDirection();
         Vector3 avoidObjects = GetObstacleAvoidDirection();
         Vector3 noise = new Vector3(
-            (Random.value * NoiseMaximum * 2) - NoiseMaximum,
-            (Random.value * NoiseMaximum * 2) - NoiseMaximum,
-            (Random.value * NoiseMaximum * 2) - NoiseMaximum
+            (float)((rnd.NextDouble() * NoiseMaximum * 2) - NoiseMaximum),
+            (float)((rnd.NextDouble() * NoiseMaximum * 2) - NoiseMaximum),
+            (float)((rnd.NextDouble() * NoiseMaximum * 2) - NoiseMaximum)
             );
         Vector3 cohese = GetCohesion();
 
@@ -181,12 +192,12 @@ public class Boid : MonoBehaviour
         Vector3 sum = Vector3.zero;
         int count = 0;
 
-        foreach (GameObject other in friends)
+        foreach (var other in friends)
         {
-            float d = Vector3.Distance(this.transform.position, other.transform.position);
+            float d = Vector3.Distance(this.localPos, other.Position);
             if (d > 0 && d < FriendRadius)
             {
-                Vector3 copy = other.GetComponent<Boid>().Move;
+                Vector3 copy = other.Move;
                 copy.Normalize();
                 copy /= d;
                 sum += copy;
@@ -208,12 +219,12 @@ public class Boid : MonoBehaviour
         Vector3 steer = Vector3.zero;
         int count = 0;
 
-        foreach (GameObject other in friends)
+        foreach (var other in friends)
         {
-            float d = Vector3.Distance(this.transform.position, other.transform.position);
+            float d = Vector3.Distance(this.localPos, other.Position);
             if (d > 0 && d < CrowdRadius)
             {
-                Vector3 difference = this.transform.position - other.transform.position;
+                Vector3 difference = this.localPos - other.Position;
                 difference.Normalize();
                 difference /= d;
                 steer += difference;
@@ -234,13 +245,14 @@ public class Boid : MonoBehaviour
         Vector3 steer = Vector3.zero;
         int count = 0;
 
-        foreach (GameObject avoid in Avoids)
+        foreach (var avoid in Avoids)
         {
-            float d = Vector3.Distance(this.transform.position, avoid.GetComponent<Collider>().ClosestPointOnBounds(this.transform.position));
+            //Vector3 closePoint = this.ClosestPointOnBounds(this.localPos, avoid);
+            float d = Vector3.Distance(this.localPos, avoid.center);
 
             if (d > 0 && d < AvoidRadius)
             {
-                Vector3 difference = this.transform.position - avoid.transform.position;
+                Vector3 difference = this.localPos - avoid.center;
                 difference.Normalize();
                 difference /= d;
                 steer += difference;
@@ -261,19 +273,19 @@ public class Boid : MonoBehaviour
         Vector3 sum = Vector3.zero;
         int count = 0;
 
-        foreach (GameObject other in friends)
+        foreach (var other in friends)
         {
-            float d = Vector3.Distance(this.transform.position, other.transform.position);
+            float d = Vector3.Distance(this.localPos, other.Position);
             if (d > 0 && d < CoheseRadius)
             {
-                sum += other.transform.position;
+                sum += other.Position;
                 count++;
             }
         }
         if (count > 0)
         {
             sum /= count;
-            Vector3 desired = sum - this.transform.position;
+            Vector3 desired = sum - this.localPos;
 
             return Vector3.ClampMagnitude(desired, 0.05f);
         }
@@ -288,19 +300,19 @@ public class Boid : MonoBehaviour
     {
         Vector3 signed = Move;
 
-        if ((this.transform.localPosition.x <= (-Bounds.size.x / 2) && Move.x < 0))
+        if ((this.localPos.x <= (-boundsSize.x / 2) && Move.x < 0))
             signed.x = Mathf.Abs(Move.x);
-        else if (this.transform.localPosition.x >= (Bounds.size.x / 2) && Move.x > 0)
+        else if (this.localPos.x >= (boundsSize.x / 2) && Move.x > 0)
             signed.x = -Mathf.Abs(Move.x);
 
-        if ((this.transform.localPosition.y <= (-Bounds.size.y / 2) && Move.y < 0))
+        if ((this.localPos.y <= (-boundsSize.y / 2) && Move.y < 0))
             signed.y = Mathf.Abs(Move.y);
-        else if (this.transform.localPosition.y >= (Bounds.size.y / 2) && Move.y > 0)
+        else if (this.localPos.y >= (boundsSize.y / 2) && Move.y > 0)
             signed.y = -Mathf.Abs(Move.y);
 
-        if ((this.transform.localPosition.z <= (-Bounds.size.z / 2) && Move.z < 0))
-            signed.z = Mathf.Abs(Move.z);   
-        else if (this.transform.localPosition.z >= (Bounds.size.z / 2) && Move.z > 0)
+        if ((this.localPos.z <= (-boundsSize.z / 2) && Move.z < 0))
+            signed.z = Mathf.Abs(Move.z);
+        else if (this.localPos.z >= (boundsSize.z / 2) && Move.z > 0)
             signed.z = -Mathf.Abs(Move.z);
 
         Move = signed;
@@ -311,7 +323,27 @@ public class Boid : MonoBehaviour
     /// </summary>
     private void TurnToVelocityDirection()
     {
-        this.transform.rotation = Quaternion.LookRotation(Move);
+        this.Rotation = Quaternion.LookRotation(Move);
+    }
+
+    /// <summary>
+    /// Gets the closest point to a vector from a BoxCollider.
+    /// (I can't use the built in one because it isn't thread safe.)
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="collider"></param>
+    /// <returns></returns>
+    private Vector3 ClosestPointOnBounds(Bounds collider)
+    {
+        Vector3 dirVector = this.localPos - new Vector3(0,0,1);
+
+        //var dx = Math.Max(collider.min.x - point.x, point.x - collider.max.x);
+        //var dy = Math.Max(collider.min.y - point.y, point.y - collider.max.y);
+        //var dz = Math.Max(collider.min.y - point.y, point.y - collider.max.y);
+
+        //return new Vector3(dx, dy, dz);
+
+        return Vector3.zero;
     }
 
 }

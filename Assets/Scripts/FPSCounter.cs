@@ -8,12 +8,22 @@ using UnityEngine.UI;
 /// </summary>
 public class FPSCounter : MonoBehaviour
 {
+    public BoidsController controller;
 
     float deltaTime = 0.0f;
+    float lastThread = 0.0f;
+    float deltaThread = 0.0f;
 
     void Update()
     {
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+
+        if (controller != null && controller.Boids != null)
+        {
+            float currentThread = controller.GetTasksRun;
+            deltaThread = (currentThread - lastThread) / controller.Boids.Count;
+            lastThread = currentThread;
+        }
     }
 
     void OnGUI()
@@ -29,7 +39,8 @@ public class FPSCounter : MonoBehaviour
         float msec = deltaTime * 1000.0f;
         float fps = 1.0f / deltaTime;
         //string text = string.Format("{0:0.0} ms ({1:0.} fps)", msec, fps);
-        string text = string.Format("{0:0} fps", fps);
+        float fpsParallel = deltaThread;
+        string text = string.Format("{0:0} fps", fpsParallel);
         GUI.Label(rect, text, style);
     }
 }
