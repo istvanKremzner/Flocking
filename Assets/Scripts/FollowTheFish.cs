@@ -11,6 +11,7 @@ public class FollowTheFish : MonoBehaviour
 
     public Transform Fish
     {
+        get { return fish; }
         set
         {
             fish = value;

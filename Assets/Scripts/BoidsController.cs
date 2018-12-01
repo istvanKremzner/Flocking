@@ -49,28 +49,16 @@ public class BoidsController : MonoBehaviour
     [Header("Debug options")]
     public bool showFriendRadius;
 
-    private float realMaxSpeed;
-    public float GetMaxSpeed
-    {
-        get
-        {
-            return realMaxSpeed;
-            //return maxSpeed/** prefab.transform.localScale.x*/;
-        }
-    }
 
-    [SerializeField]
-    private float realFriendRadius;
-    public float GetFriendRadius { get { return realFriendRadius; } }
-    [SerializeField]
-    private float realCrowdRadius;
-    public float GetCrowdRadius { get { return realCrowdRadius; } }
-    [SerializeField]
-    private float realAvoidRadius;
-    public float GetAvoidRadius { get { return realAvoidRadius; } }
-    [SerializeField]
-    private float realCoheseRadius;
-    public float GetCoheseRadius { get { return realCoheseRadius; } }
+    public float Scale { get; private set; }
+
+    public float GetMaxSpeed { get { return maxSpeed * Scale; } }
+    public float GetFriendRadius { get { return friendRadius * Scale / 2; } }
+    public float GetCrowdRadius { get { return crowdRadius * Scale / 2; } }
+    public float GetAvoidRadius { get { return avoidRadius * Scale / 10; } }
+    public float GetCoheseRadius { get { return coheseRadius * Scale / 4; } }
+
+    public bool Freeze { get; set; }
 
     public BoxCollider Bounds
     {
@@ -96,28 +84,47 @@ public class BoidsController : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        bounds = this.GetComponent<BoxCollider>();
+        avoids = new List<Bounds>();
+        boids = new List<Boid>();
+        boidObjects = new List<GameObject>();
+
+        workQueue = new ConcurrentQueue<Boid>();
+        tasks = new List<Task>();
+        cts = new CancellationTokenSource();
+        sleepingEvent = new ManualResetEvent(false);
+    }
+
     /// <summary>
     /// Inits the variables, gets the Obstacles and instantiates the Boids.
     /// </summary>
     public void Init()
     {
-        bounds = this.GetComponent<BoxCollider>();
         SetBoundsSize();
-
-        avoids = new List<Bounds>();
-        boids = new List<Boid>();
-        boidObjects = new List<GameObject>();
 
         GetObstacles();
 
         float minPerc = 0.1f;
-        for (int i = 0; i < InitNumber; i++)
+
+        List<Vector3> initPosList = new List<Vector3>();
+
+        while (initPosList.Count != InitNumber)
         {
-            GameObject actGameObj = Instantiate(prefab, this.transform);
-            actGameObj.transform.localPosition = new Vector3(
+            Vector3 current = new Vector3(
                (Random.Range(minPerc, 1 - minPerc) * bounds.size.x) - bounds.size.x / 2,
                 (Random.Range(minPerc, 1 - minPerc) * bounds.size.y) - bounds.size.y / 2,
                (Random.Range(minPerc, 1 - minPerc) * bounds.size.z) - bounds.size.z / 2);
+
+            if (!initPosList.Contains(current))
+                initPosList.Add(current);
+        }
+
+        foreach (var pos in initPosList)
+        {
+            GameObject actGameObj = Instantiate(prefab, this.transform);
+            actGameObj.transform.localPosition = pos;
 
             actGameObj.AddComponent<Boid>();
             actGameObj.GetComponent<Boid>().SetController(this, actGameObj.transform.localPosition);
@@ -128,7 +135,6 @@ public class BoidsController : MonoBehaviour
 
         ParallelInit();
 
-        realMaxSpeed = maxSpeed * prefab.transform.localScale.x;
         inited = true;
     }
 
@@ -155,12 +161,7 @@ public class BoidsController : MonoBehaviour
         Bounds.size = volume3D;
 
         prefab.transform.localScale = volume / 50 * Vector3.one;
-        float scale = prefab.transform.localScale.x;
-
-        realFriendRadius = friendRadius * scale / 2;
-        realCoheseRadius = coheseRadius * scale / 4;
-        realCrowdRadius = crowdRadius * scale / 4;
-        realAvoidRadius = avoidRadius* scale / 10;
+        Scale = prefab.transform.localScale.x;
 
         SetCameraSize();
     }
@@ -170,39 +171,39 @@ public class BoidsController : MonoBehaviour
         //Camera.main;
     }
 
-    /*Here comes the parralel part.*/
+    /*Here comes the parallel part.*/
 
     private bool inited = false;
-    private List<Thread> threads;
+    private List<Task> tasks;
     private ManualResetEvent sleepingEvent;
     private ConcurrentQueue<Boid> workQueue;
     private CancellationTokenSource cts;
     private int tasksRan = 0;
 
     public int GetTasksRun { get { return tasksRan; } }
-    public int GetThreadCount { get { return threads.Count; } }
+    public int GetThreadCount { get { return tasks.Count; } }
 
     /// <summary>
     /// Prallel init
     /// </summary>
     private void ParallelInit()
     {
-        workQueue = new ConcurrentQueue<Boid>();
-        threads = new List<Thread>();
-        cts = new CancellationTokenSource();
-        sleepingEvent = new ManualResetEvent(false);
-
         for (int i = 0; i < Environment.ProcessorCount - 1; i++)
         {
-            Thread t = new Thread(() => Process(cts.Token, sleepingEvent));
+            int index = i;
+            Task t = new Task(() => Process(cts.Token, sleepingEvent, index), cts.Token, TaskCreationOptions.LongRunning);
             t.Start();
-            threads.Add(t);
+            tasks.Add(t);
+
+            //Thread t = new Thread(() => Process(cts.Token, sleepingEvent, index));
+            //t.Start();
+            //threads.Add(t);
         }
     }
 
     private void Update()
     {
-        if (inited)
+        if (inited && ((Freeze && Time.timeScale != 0) || (!Freeze)))
         {
             Boid temp;
             foreach (var item in workQueue)
@@ -226,13 +227,13 @@ public class BoidsController : MonoBehaviour
         boidObject.transform.rotation = boid.Rotation;
     }
 
-    private void Process(CancellationToken ct, ManualResetEvent sleepEvent)
+    private void Process(CancellationToken ct, ManualResetEvent sleepEvent, int index)
     {
         System.Random rnd = new System.Random();
         ManualResetEvent _event = new ManualResetEvent(true);
         Boid currentBoid;
 
-        while (!ct.IsCancellationRequested)
+        while (ct.IsCancellationRequested)
         {
             currentBoid = null;
             workQueue.TryDequeue(out currentBoid);
@@ -244,7 +245,8 @@ public class BoidsController : MonoBehaviour
             else
             {
                 //Thread.Sleep(rnd.Next(5, 30));
-                Interlocked.Increment(ref tasksRan);
+                //Interlocked.Increment(ref tasksRan);
+                Debug.Log("Thread number: " + index);
                 sleepEvent.WaitOne();
             }
         }
@@ -253,12 +255,25 @@ public class BoidsController : MonoBehaviour
     private void OnDestroy()
     {
         cts.Cancel();
+
         sleepingEvent.Close();
 
-        foreach (var t in threads)
-        {
-            t.Join();
-        }
+        //foreach (var t in threads)
+        //{
+        //    t.Join();
+        //}
+        //Task.WaitAll(threads.ToArray());
+
+        prefab.transform.localScale = Vector3.one;
+    }
+
+    public void TurnAnimationsOnOff(bool isOn)
+    {
+        if (boidObjects != null)
+            foreach (GameObject boidO in boidObjects)
+            {
+                boidO.GetComponent<Animator>().enabled = isOn;
+            }
     }
 
 }

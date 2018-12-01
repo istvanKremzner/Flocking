@@ -11,12 +11,19 @@ public class FollowTheBoid : MonoBehaviour
     public GameObject bounds;
     public Vector3 offset;
 
+    private BoidsController controller;
+
     private List<Boid> boids
     {
         get
         {
-            return bounds.GetComponent<BoidsController>().Boids;
+            return controller.Boids;
         }
+    }
+
+    private void Start()
+    {
+        controller = bounds.GetComponent<BoidsController>();
     }
 
     /// <summary>
@@ -28,9 +35,12 @@ public class FollowTheBoid : MonoBehaviour
         {
             Vector3 avaragePosition = GetAvaragePos();
 
-            this.transform.position = avaragePosition - offset;
+            if (avaragePosition != Vector3.zero)
+            {
+                this.transform.position = avaragePosition - (offset * controller.Scale / 100);
 
-            this.transform.LookAt(avaragePosition);
+                //this.transform.LookAt(avaragePosition);
+            }
         }
     }
 
@@ -42,13 +52,16 @@ public class FollowTheBoid : MonoBehaviour
     {
         Vector3 sum = Vector3.zero;
 
-        foreach (Boid actBoid in boids)
-            sum += actBoid.Position;
+        if (boids != null)
+        {
+            foreach (Boid actBoid in boids)
+                sum += actBoid.Position;
 
-        if (boids.Count > 0)
-            return sum / boids.Count;
+            if (boids.Count > 0)
+                return sum / boids.Count;
+        }
 
-        return this.transform.position + offset;
+        return sum;
     }
 
 }

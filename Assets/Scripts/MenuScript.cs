@@ -30,6 +30,8 @@ public class MenuScript : MonoBehaviour
     public Toggle OptionAvoid;
     public Toggle OptionNoise;
     public Toggle OptionCohese;
+    public Toggle AnimationToggle;
+    public Toggle FreezeToggle;
 
     [Header("Sliders")]
     public Slider MaxSpeed;
@@ -205,6 +207,7 @@ public class MenuScript : MonoBehaviour
     /// </summary>
     public void Restart()
     {
+        controller.prefab.transform.localScale = Vector3.one;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -214,6 +217,16 @@ public class MenuScript : MonoBehaviour
     public void ShutDown()
     {
         Application.Quit();
+    }
+
+    public void SetAnimations()
+    {
+        controller.TurnAnimationsOnOff(AnimationToggle.isOn);
+    }
+
+    public void ChangePause()
+    {
+        controller.Freeze = FreezeToggle.isOn;
     }
 
     /// <summary>
@@ -246,7 +259,4 @@ public class MenuScript : MonoBehaviour
     {
         GetValues();
     }
-
-
-
 }

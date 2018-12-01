@@ -15,6 +15,7 @@ public class KeyHandler : MonoBehaviour
     private const float SCROLLSTEP = 100;
 
     public GameObject Menu;
+    public BoidsController controller;
 
     /// <summary>
     /// Freezes time for the Start Menu.
@@ -56,8 +57,8 @@ public class KeyHandler : MonoBehaviour
 
             float scroll = Input.GetAxis("Mouse ScrollWheel");
 
-            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadPlus) ? 0.05f : scroll;
-            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadMinus) ? -0.05f : scroll;
+            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadPlus) ? 0.05f * controller.Scale / 10 : scroll;
+            scroll = scroll == 0 && Input.GetKey(KeyCode.KeypadMinus) ? -0.05f * controller.Scale / 10 : scroll;
 
             if (scroll != 0)
             {
@@ -69,11 +70,22 @@ public class KeyHandler : MonoBehaviour
             if (followFish.enabled)
             {
                 followFish.Offset += moveCamera;
-                followFish.RotationOffset += GetCameraRotation();
+
+                //var rot = GetCameraRotation();
+                //var fish = followFish.Fish;
+                //var off = followFish.Offset;
+
+
+                //followFish.RotationOffset += (fish.right + off) * rot.x;
+                //followFish.RotationOffset += (fish.up + off) * rot.y;
+                //followFish.RotationOffset += (fish.forward + off) * rot.z;
             }
             else
             {
-                Camera.main.transform.position += moveCamera;
+                //Camera.main.transform.position +=  moveCamera;
+                Camera.main.transform.position += Camera.main.transform.right * moveCamera.x;
+                Camera.main.transform.position += Camera.main.transform.up * moveCamera.y;
+                Camera.main.transform.position += Camera.main.transform.forward * moveCamera.z;
                 Camera.main.transform.eulerAngles += GetCameraRotation();
             }
         }
@@ -105,7 +117,7 @@ public class KeyHandler : MonoBehaviour
             moveCamera += new Vector3(-CAMERAMOVESTEP, 0, 0);
         }
 
-        return moveCamera;
+        return moveCamera * controller.Scale / 2;
     }
 
     /// <summary>
@@ -134,7 +146,7 @@ public class KeyHandler : MonoBehaviour
             cameraRotation += new Vector3(0, -CAMERAROTATIONSPEED, 0);
         }
 
-        return cameraRotation;
+        return cameraRotation * 6;
     }
 
     private void FollowFish()
@@ -147,15 +159,13 @@ public class KeyHandler : MonoBehaviour
 
                 if (!followFish.enabled)
                 {
-
                     RaycastHit hit;
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    if (Physics.Raycast(ray, out hit, 100))
+                    if (Physics.Raycast(ray, out hit))
                     {
-
                         Transform objectHit = hit.transform;
 
-                        if (objectHit.GetComponent<Rigidbody>())
+                        if (hit.transform != controller.transform)
                         {
                             followFish.Fish = objectHit;
                             followFish.Offset = new Vector3(0, 0, -100);
