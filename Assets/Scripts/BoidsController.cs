@@ -92,7 +92,7 @@ public class BoidsController : MonoBehaviour
         boidObjects = new List<GameObject>();
 
         workQueue = new ConcurrentQueue<Boid>();
-        tasks = new List<Task>();
+        threads = new List<Thread>();
         cts = new CancellationTokenSource();
         sleepingEvent = new ManualResetEvent(false);
     }
@@ -162,26 +162,19 @@ public class BoidsController : MonoBehaviour
 
         prefab.transform.localScale = volume / 50 * Vector3.one;
         Scale = prefab.transform.localScale.x;
-
-        SetCameraSize();
-    }
-
-    private void SetCameraSize()
-    {
-        //Camera.main;
     }
 
     /*Here comes the parallel part.*/
 
     private bool inited = false;
-    private List<Task> tasks;
+    private List<Thread> threads;
     private ManualResetEvent sleepingEvent;
     private ConcurrentQueue<Boid> workQueue;
     private CancellationTokenSource cts;
     private int tasksRan = 0;
 
     public int GetTasksRun { get { return tasksRan; } }
-    public int GetThreadCount { get { return tasks.Count; } }
+    public int GetThreadCount { get { return threads.Count; } }
 
     /// <summary>
     /// Prallel init
@@ -191,13 +184,13 @@ public class BoidsController : MonoBehaviour
         for (int i = 0; i < Environment.ProcessorCount - 1; i++)
         {
             int index = i;
-            Task t = new Task(() => Process(cts.Token, sleepingEvent, index), cts.Token, TaskCreationOptions.LongRunning);
-            t.Start();
-            tasks.Add(t);
-
-            //Thread t = new Thread(() => Process(cts.Token, sleepingEvent, index));
+            //Task t = new Task(() => Process(cts.Token, sleepingEvent, index), cts.Token, TaskCreationOptions.LongRunning);
             //t.Start();
-            //threads.Add(t);
+            //tasks.Add(t);
+
+            Thread t = new Thread(() => Process(cts.Token, sleepingEvent, index));
+            t.Start();
+            threads.Add(t);
         }
     }
 
@@ -254,11 +247,11 @@ public class BoidsController : MonoBehaviour
 
         sleepingEvent.Close();
 
-        //foreach (var t in threads)
-        //{
-        //    t.Join();
-        //}
-        Task.WaitAll(tasks.ToArray());
+        foreach (var t in threads)
+        {
+            t.Join();
+        }
+        //Task.WaitAll(tasks.ToArray());
 
         prefab.transform.localScale = Vector3.one;
     }
