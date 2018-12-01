@@ -177,7 +177,6 @@ public class MenuScript : MonoBehaviour
     /// </summary>
     public void ChangeAnimal()
     {
-        FollowTheBoid followScript = mainCamera.GetComponent<FollowTheBoid>();
         if (SelectedAnimal.value == 0)
         {
             //controller.prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefab/Fish.prefab", typeof(GameObject));

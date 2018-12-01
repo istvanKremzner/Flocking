@@ -1460,6 +1460,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 1
+      - m_Target: {fileID: 1800921280}
+        m_MethodName: set_interactable
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 1
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &305249086
@@ -6327,7 +6338,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3442d79448f332149bbb011f40e1beae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followRayMaxLength: 0
   Menu: {fileID: 761125962}
   controller: {fileID: 1628143745}
 --- !u!1 &1367739067
@@ -7628,7 +7638,7 @@ MonoBehaviour:
   friendRadius: 20
   crowdRadius: 4
   avoidRadius: 6
-  coheseRadius: 2.5
+  coheseRadius: 20
   maxNoise: 0.1
   optionFriend: 1
   optionCrowd: 1
@@ -8273,7 +8283,7 @@ MonoBehaviour:
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1800921281}
   m_Template: {fileID: 496017666}
   m_CaptionText: {fileID: 1991747704}

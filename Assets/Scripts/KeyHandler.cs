@@ -8,8 +8,6 @@ using UnityEngine;
 /// </summary>
 public class KeyHandler : MonoBehaviour
 {
-    public float followRayMaxLength;
-
     private const float CAMERAMOVESTEP = 2;
     private const float CAMERAROTATIONSPEED = 0.2f;
     private const float SCROLLSTEP = 100;
