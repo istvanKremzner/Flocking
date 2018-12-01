@@ -216,7 +216,6 @@ public class BoidsController : MonoBehaviour
                 UpdatePositions(boidObjects[i], boids[i]);
                 workQueue.Enqueue(boids[i]);
             }
-
             sleepingEvent.Set();
         }
     }
@@ -229,11 +228,9 @@ public class BoidsController : MonoBehaviour
 
     private void Process(CancellationToken ct, ManualResetEvent sleepEvent, int index)
     {
-        System.Random rnd = new System.Random();
-        ManualResetEvent _event = new ManualResetEvent(true);
+        //System.Random rnd = new System.Random();
         Boid currentBoid;
-
-        while (ct.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
             currentBoid = null;
             workQueue.TryDequeue(out currentBoid);
@@ -246,7 +243,6 @@ public class BoidsController : MonoBehaviour
             {
                 //Thread.Sleep(rnd.Next(5, 30));
                 //Interlocked.Increment(ref tasksRan);
-                Debug.Log("Thread number: " + index);
                 sleepEvent.WaitOne();
             }
         }
@@ -262,7 +258,7 @@ public class BoidsController : MonoBehaviour
         //{
         //    t.Join();
         //}
-        //Task.WaitAll(threads.ToArray());
+        Task.WaitAll(tasks.ToArray());
 
         prefab.transform.localScale = Vector3.one;
     }
